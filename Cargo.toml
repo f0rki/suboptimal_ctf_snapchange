@@ -8,7 +8,8 @@ exclude = ["snapshot", "docker"]
 
 [dependencies]
 anyhow = "1"
-snapchange = { version = "0.1.0", git = "https://github.com/f0rki/snapchange", branch = "custom-feedback", features = ["custom_feedback"] }
+# snapchange = { version = "0.1.0", git = "https://github.com/f0rki/snapchange", branch = "custom-feedback", features = ["custom_feedback"] }
+snapchange = { path = "../snapchange", features = ["custom_feedback"] }
 rand = "0.8"
 log = "0.4"
 

@@ -1,11 +1,24 @@
 #!/bin/bash
-set -ex
+set -e
 
 # Build the base snapchange image used for snapshotting
 if [[ "$(docker images -q snapchange_snapshot 2> /dev/null)" == "" ]]; then
     echo "Create snapchange_snapshot docker from snapchange github"
     exit 1
 fi
+
+if ! command -v r2 >/dev/null 2>&1; then
+    if command -v rizin >/dev/null 2>&1; then
+        function r2 {
+            rizin "$@"
+            return $?
+        }
+        # alias r2=rizin
+        echo "using rizing instead of r2"
+    fi
+fi
+
+set -x
 
 # Create the patched binary with `int3 ; vmcall` at `main`
 cp suboptimal suboptimal.patched
@@ -24,5 +37,6 @@ docker run --rm -i \
     ctf_suboptimal:snapshot
 
 # Replace the original bytes that we overwrote to take the snapshot
-BYTES=`r2 -q -c 'p8 16 @ main' suboptimal`
+BYTES="$(r2 -q -c 'p8 16 @ main' suboptimal)"
+echo "got main bytes: $BYTES"
 r2 -w -q -c "/x cc0f01c1cdcdcdcd ; wx $BYTES @ hit0_0" ./snapshot/fuzzvm.physmem

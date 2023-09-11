@@ -1,7 +1,12 @@
-FROM ctf_suboptimal:target as target
+# FROM alpine:edge as target
+# RUN apk add --no-cache --initramfs-diskless-boot \
+#     python3 gdb curl tar build-base perf \
+#     nasm gcc musl-dbg gcompat
 
-RUN apk add --no-cache --initramfs-diskless-boot python3 gdb curl tar build-base perf \
-	musl-dbg gcompat
+FROM ubuntu:latest as target
+RUN apt-get update -q && apt-get install -q -y libc6-dbg gdb python3 python-is-python3 && apt-get clean -y
+
+COPY suboptimal.patched /opt/
 
 FROM snapchange_snapshot
 COPY --from=target / "$SNAPSHOT_INPUT"
